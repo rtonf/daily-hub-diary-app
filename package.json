@@ -1,0 +1,22 @@
+{
+  "name": "my-diary-app",
+  "version": "1.0.0",
+  "description": "日記、目標、予定、リマインダーをまとめるPWA/Androidアプリ",
+  "main": "index.html",
+  "scripts": {
+    "serve": "python -m http.server 3000 --bind 127.0.0.1",
+    "prepare:android": "node scripts/copy-web-assets.js",
+    "android:add": "npm run prepare:android && npx cap add android",
+    "android:sync": "npm run prepare:android && npx cap sync android",
+    "android:build": "npm run android:sync && cd android && gradlew.bat assembleDebug"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4"
+  }
+}

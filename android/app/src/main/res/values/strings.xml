@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">デイリー・ハブ</string>
+    <string name="title_activity_main">デイリー・ハブ</string>
+    <string name="package_name">com.dailyhub.diary</string>
+    <string name="custom_url_scheme">com.dailyhub.diary</string>
+</resources>

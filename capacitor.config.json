@@ -1,0 +1,6 @@
+{
+  "appId": "com.dailyhub.diary",
+  "appName": "デイリー・ハブ",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

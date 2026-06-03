@@ -1,0 +1,2359 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>デイリー目標・日記・カレンダー</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="theme-color" content="#4f46e5" />
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Noto Sans JP", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f4f7fc;
+      color: #111827;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    [hidden] {
+      display: none !important;
+    }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+    }
+    .device {
+      width: 390px;
+      max-width: 100%;
+      min-height: 820px;
+      border-radius: 28px;
+      overflow: hidden;
+      background: #ffffff;
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.16);
+      display: flex;
+      flex-direction: column;
+    }
+    .topbar {
+      padding: 18px 20px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      border-bottom: 1px solid #ebeff5;
+    }
+    .topbar h1 {
+      font-size: 18px;
+      margin: 0;
+      letter-spacing: 0.02em;
+    }
+    .topbar .sub {
+      font-size: 13px;
+      color: #64748b;
+    }
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px 92px;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+    }
+    .section-title {
+      font-size: 15px;
+      margin: 0 0 14px;
+      color: #0f172a;
+    }
+    .sub-text {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    .text-area,
+    .text-input,
+    .search-input,
+    .select-input,
+    .time-input {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #dbeafe;
+      background: #f8fbff;
+      color: #0f172a;
+      font-size: 14px;
+      padding: 14px 14px;
+      outline: none;
+    }
+    .text-area {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .row .button,
+    .row .select-input {
+      flex: 1;
+    }
+    .button {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+      background: #4f46e5;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+      min-height: 48px;
+    }
+    .button.small {
+      padding: 10px 14px;
+      font-size: 13px;
+      min-height: 42px;
+    }
+    .button.ghost {
+      background: #f8fafc;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+    }
+    .button.delete {
+      background: #ef4444;
+    }
+    .button:active {
+      transform: scale(0.98);
+    }
+    .button[disabled] {
+      opacity: 0.55;
+      cursor: default;
+    }
+    .habit-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+      background: #f8fbff;
+      margin-bottom: 10px;
+    }
+    .habit-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: #4338ca;
+    }
+    .habit-item input[type="text"] {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      color: #0f172a;
+      width: 100%;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .stat-card {
+      background: #eef2ff;
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 82px;
+    }
+    .stat-card strong {
+      display: block;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+    .stat-card span {
+      color: #475569;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .today-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .summary-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px;
+      background: #f8fbff;
+      min-height: 70px;
+    }
+    .summary-item strong {
+      display: block;
+      font-size: 16px;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+    .summary-item span {
+      display: block;
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.35;
+    }
+    .report-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .report-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 13px;
+      color: #334155;
+    }
+    .report-list li:last-child {
+      border-bottom: none;
+    }
+    .goal-tab-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .goal-tab-button {
+      flex: 1;
+      border: 1px solid #dbeafe;
+      border-radius: 10px;
+      background: #f8fafc;
+      color: #475569;
+      padding: 12px 0;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .goal-tab-button.active {
+      background: #4f46e5;
+      color: #ffffff;
+      border-color: #4f46e5;
+    }
+    .habit-toggle {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 2px solid #dbeafe;
+      background: linear-gradient(180deg,#fff,#f8fafc);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, background .18s ease;
+      color: #4f46e5;
+    }
+    .habit-toggle.done {
+      background: linear-gradient(180deg,#34d399,#10b981);
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(16,185,129,0.16);
+      transform: scale(1.02);
+    }
+    .habit-title {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 15px;
+      color: #0f172a;
+      padding-left: 8px;
+    }
+    .calendar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    #goalView.continue-mode .today-summary {
+      display: none;
+    }
+    #goalView.continue-mode > .section-title {
+      display: none;
+    }
+    .today-button {
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #dbeafe;
+    }
+    .tab-bar {
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px 16px;
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      box-shadow: 0 -10px 25px rgba(15, 23, 42, 0.08);
+    }
+    .tab-button {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 6px;
+      border-radius: 10px;
+      background: #f8fafc;
+      color: #64748b;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      font-size: 13px;
+    }
+    .tab-button.active {
+      background: #eef2ff;
+      color: #4f46e5;
+      border-color: #c7d2fe;
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.12);
+    }
+    .tab-button .tab-icon {
+      display: inline-flex;
+      width: 32px;
+      height: 32px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: currentColor;
+      color: #ffffff;
+      font-size: 16px;
+      opacity: 0.15;
+    }
+    .tab-button.active .tab-icon {
+      opacity: 1;
+    }
+    .tab-button .tab-label {
+      line-height: 1.2;
+    }
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .calendar-month {
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      flex: 1;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .calendar-cell,
+    .calendar-head {
+      border-radius: 10px;
+      min-height: 70px;
+      padding: 10px 8px;
+    }
+    .calendar-head {
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 12px;
+      text-align: center;
+    }
+    .calendar-cell {
+      background: #f8fbff;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .calendar-cell:hover {
+      transform: translateY(-1px);
+      border-color: #c7d2fe;
+    }
+    .calendar-cell.selected {
+      box-shadow: inset 0 0 0 2px #4f46e5;
+    }
+    .calendar-cell .date-number {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .calendar-cell .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .calendar-tag {
+      font-size: 10px;
+      padding: 4px 6px;
+      border-radius: 999px;
+      background: rgba(79, 70, 229, 0.12);
+      color: #4338ca;
+      line-height: 1.2;
+    }
+    .calendar-event-list-small {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .calendar-event-line {
+      font-size: 11px;
+      color: #0f172a;
+      background: rgba(96,165,250,0.06);
+      padding: 4px 6px;
+      border-radius: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .calendar-cell .marker {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      bottom: 8px;
+      left: 8px;
+    }
+    .marker.diary {
+      background: #f87171;
+    }
+    .marker.schedule {
+      background: #60a5fa;
+      left: 22px;
+    }
+    .marker.habit {
+      background: #34d399;
+      left: 36px;
+    }
+    .calendar-details {
+      display: grid;
+      gap: 12px;
+    }
+    .detail-card {
+      background: #f8fbff;
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+    }
+    .detail-card h3 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+    .detail-item {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .detail-item:last-child {
+      margin-bottom: 0;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .detail-item .item-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 6px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .detail-item .item-body {
+      font-size: 13px;
+      color: #334155;
+      line-height: 1.6;
+    }
+    .small-note {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.32);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 20;
+      padding: 20px;
+    }
+    .modal.hidden {
+      display: none;
+    }
+    .modal-card {
+      width: 100%;
+      max-width: 380px;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
+    }
+    .modal-title {
+      font-size: 16px;
+      margin: 0 0 10px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .status-text {
+      color: #2563eb;
+      font-size: 13px;
+      min-height: 1.2em;
+      margin-top: 4px;
+    }
+    .note {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+    .icon-button {
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      padding: 6px 8px;
+      cursor: pointer;
+      color: #475569;
+    }
+    .settings-input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #e6eefc;
+      background: #fbfdff;
+      font-size: 14px;
+    }
+    .settings-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .settings-panel {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px;
+      background: #f8fbff;
+      margin-top: 12px;
+    }
+    .settings-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+    .settings-help {
+      font-size: 12px;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 8px 0 0;
+    }
+    .settings-status-list {
+      display: grid;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .settings-status-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      color: #475569;
+    }
+    .settings-status-item strong {
+      color: #0f172a;
+      white-space: nowrap;
+    }
+    /* Reference-inspired dark mobile redesign */
+    body {
+      background: #050505;
+      color: #f8fafc;
+    }
+    .device {
+      width: 430px;
+      height: 100dvh;
+      min-height: 0;
+      border-radius: 0;
+      background: #080808;
+      box-shadow: none;
+    }
+    .topbar {
+      padding: 20px 22px 14px;
+      background: #080808;
+      border-bottom: 1px solid #1f1f1f;
+      align-items: flex-start;
+      gap: 12px;
+      flex: 0 0 auto;
+    }
+    .topbar > div:first-child {
+      min-width: 0;
+      flex: 1;
+    }
+    .topbar > div:last-child {
+      flex-shrink: 0;
+    }
+    .topbar h1 {
+      font-size: 26px;
+      color: #ffffff;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+    .topbar .sub {
+      color: #9ca3af;
+      font-size: 13px;
+    }
+    #todayLabel {
+      display: none;
+    }
+    .icon-button {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: #151515;
+      color: #f8fafc;
+      border: 1px solid #262626;
+      font-size: 20px;
+    }
+    .content {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      padding: 12px 20px 8px;
+      background: #080808;
+    }
+    .section-title {
+      color: #ffffff;
+      font-size: 28px;
+      margin: 0 0 18px;
+    }
+    .sub-text,
+    .note,
+    .small-note {
+      color: #a1a1aa;
+    }
+    .today-summary {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .summary-item {
+      background: #141414;
+      border-color: #2a2a2a;
+      border-radius: 16px;
+      padding: 10px 12px;
+      min-height: 54px;
+    }
+    .summary-item strong {
+      color: #ffffff;
+      font-size: 18px;
+    }
+    .summary-item span {
+      color: #9ca3af;
+      font-size: 12px;
+    }
+    .card,
+    .detail-card {
+      background: #101010;
+      border-color: #2a2a2a;
+      border-radius: 20px;
+      box-shadow: none;
+    }
+    .screen-panel {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden;
+    }
+    #goalHomeView,
+    #goalContinueView {
+      min-height: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+    #goalHomeView {
+      display: grid;
+      grid-template-rows: minmax(142px, 0.75fr) minmax(210px, 1fr);
+      gap: 10px;
+    }
+    #goalHomeView[hidden],
+    #goalContinueView[hidden] {
+      display: none;
+    }
+    #goalContinueView {
+      display: grid;
+      grid-template-rows: 258px minmax(0, 1fr);
+      gap: 10px;
+    }
+    #goalContinueView .habit-item {
+      min-height: 42px;
+      padding: 6px 10px;
+      margin-bottom: 6px;
+      grid-template-columns: auto 1fr auto;
+    }
+    #goalContinueView .habit-toggle {
+      width: 32px;
+      height: 32px;
+      font-size: 16px;
+    }
+    #goalContinueView .button.small {
+      min-height: 36px;
+      padding: 8px 12px;
+    }
+    .habit-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .streak-badge {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 92px;
+      min-height: 46px;
+      padding: 8px 12px;
+      border-radius: 14px;
+      background: #ef4444;
+      color: #ffffff;
+      font-size: 21px;
+      line-height: 1;
+    }
+    .habit-remove {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid #3f3f46;
+      background: #171717;
+      color: #a1a1aa;
+      cursor: pointer;
+      font-weight: 800;
+    }
+    #goalContinueView .card {
+      margin-bottom: 0;
+    }
+    .habit-stats-card {
+      display: none;
+    }
+    .report-scroll {
+      max-height: 166px;
+      overflow: hidden;
+      overflow-y: auto;
+      padding-right: 4px;
+      scrollbar-width: thin;
+    }
+    #goalContinueView .report-list {
+      max-height: none;
+      overflow: visible;
+    }
+    .report-list li.today-report {
+      background: rgba(185, 168, 255, 0.24);
+      border-radius: 12px;
+      padding-left: 10px;
+      padding-right: 10px;
+      color: #ffffff;
+    }
+    .compact-card {
+      flex: none;
+      min-height: 0;
+      overflow: hidden;
+    }
+    #goalView:not(.continue-mode) > .section-title {
+      display: none;
+    }
+    #goalView:not(.continue-mode) .goal-tab-bar {
+      margin-bottom: 0;
+    }
+    #goalView:not(.continue-mode) .card {
+      margin-bottom: 0;
+    }
+    #goalView:not(.continue-mode) .home-schedule-list .empty-state {
+      min-height: 74px;
+    }
+    #goalView:not(.continue-mode) #goalMemo {
+      min-height: 82px;
+      max-height: 96px;
+    }
+    #goalView:not(.continue-mode) .button {
+      min-height: 42px;
+      padding: 10px 14px;
+    }
+    .home-schedule-list,
+    .day-schedule-list {
+      display: grid;
+      gap: 10px;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .schedule-line {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #242424;
+      color: #f8fafc;
+      font-weight: 700;
+      font-size: 18px;
+      background: transparent;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+      text-align: left;
+      cursor: pointer;
+    }
+    .schedule-line:last-child {
+      border-bottom: none;
+    }
+    .schedule-time {
+      color: #e5e7eb;
+      font-variant-numeric: tabular-nums;
+    }
+    .empty-state {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      color: #e5e7eb;
+      font-weight: 700;
+      font-size: 18px;
+      text-align: center;
+      min-height: 120px;
+    }
+    #goalMemo {
+      min-height: 96px;
+    }
+    .text-area,
+    .text-input,
+    .search-input,
+    .select-input,
+    .time-input,
+    .settings-input {
+      background: #0b0b0b;
+      border-color: #303030;
+      color: #ffffff;
+      border-radius: 16px;
+    }
+    .text-area::placeholder,
+    .text-input::placeholder,
+    .search-input::placeholder {
+      color: #71717a;
+    }
+    .button {
+      border-radius: 16px;
+      background: #f8fafc;
+      color: #080808;
+      min-height: 50px;
+    }
+    .button.ghost,
+    .today-button {
+      background: #1a1a1a;
+      color: #f8fafc;
+      border-color: #333333;
+    }
+    .button.delete {
+      background: #ef4444;
+      color: #ffffff;
+    }
+    .goal-tab-bar {
+      padding: 5px;
+      background: #151515;
+      border-radius: 18px;
+      gap: 6px;
+    }
+    .goal-tab-button {
+      border: none;
+      border-radius: 14px;
+      background: transparent;
+      color: #a1a1aa;
+      min-height: 48px;
+    }
+    .goal-tab-button.active {
+      background: #b9a8ff;
+      color: #17121f;
+    }
+    .habit-item {
+      background: #0b0b0b;
+      border-color: #2c2c2c;
+      border-radius: 18px;
+      min-height: 64px;
+    }
+    .habit-title,
+    .habit-item input[type="text"] {
+      color: #ffffff;
+      font-size: 16px;
+    }
+    .habit-toggle {
+      background: #171717;
+      border-color: #3f3f46;
+      color: #b9a8ff;
+      box-shadow: none;
+    }
+    .habit-toggle.done {
+      background: #10b981;
+      color: #ffffff;
+    }
+    .stat-card {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+    }
+    .stat-card strong,
+    .calendar-month,
+    .detail-card h3,
+    .detail-item .item-header {
+      color: #ffffff;
+    }
+    .stat-card span,
+    .detail-item .item-body,
+    .report-list li {
+      color: #a1a1aa;
+    }
+    .calendar-top,
+    .calendar-header {
+      margin-bottom: 10px;
+    }
+    .calendar-grid {
+      gap: 0;
+      border-top: 1px solid #1f1f1f;
+      border-left: 1px solid #1f1f1f;
+    }
+    .calendar-head,
+    .calendar-cell {
+      border-radius: 0;
+      border: none;
+      border-right: 1px solid #1f1f1f;
+      border-bottom: 1px solid #1f1f1f;
+      background: #080808;
+      min-height: 58px;
+      padding: 7px 5px;
+    }
+    .calendar-head {
+      min-height: 30px;
+      color: #6b7280;
+      background: #080808;
+    }
+    .calendar-cell {
+      color: #e5e7eb;
+    }
+    .calendar-cell.selected {
+      background: #222222;
+      box-shadow: inset 0 0 0 2px #ffffff;
+    }
+    .calendar-cell .date-number {
+      font-size: 15px;
+    }
+    .calendar-tag,
+    .calendar-event-line {
+      background: rgba(147, 197, 253, 0.18);
+      color: #93c5fd;
+      border-radius: 6px;
+    }
+    #calendarView .card {
+      margin-bottom: 0;
+      padding: 12px;
+    }
+    #calendarView .section-title {
+      margin-bottom: 8px;
+    }
+    #calendarView .button.small {
+      min-height: 36px;
+      padding: 8px 12px;
+    }
+    .tab-bar {
+      background: #080808;
+      border-top: 1px solid #2a2a2a;
+      box-shadow: none;
+      padding: 10px 16px max(14px, env(safe-area-inset-bottom));
+      flex: 0 0 68px;
+    }
+    .tab-button {
+      background: transparent;
+      border: none;
+      color: #71717a;
+      border-radius: 0;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 6px 4px;
+    }
+    .tab-button.active {
+      background: transparent;
+      color: #b9a8ff;
+      border: none;
+      box-shadow: none;
+    }
+    .tab-button .tab-icon {
+      background: transparent;
+      color: currentColor;
+      opacity: 1;
+      width: 34px;
+      height: 22px;
+      font-size: 18px;
+    }
+    .modal {
+      background: rgba(0, 0, 0, 0.72);
+    }
+    .modal-card {
+      background: #111111;
+      border: 1px solid #2a2a2a;
+      color: #ffffff;
+      border-radius: 22px;
+    }
+    .day-modal-card {
+      width: 100%;
+      height: min(760px, calc(100dvh - 28px));
+      max-width: 430px;
+      display: flex;
+      flex-direction: column;
+      padding: 22px;
+    }
+    .day-modal-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+    .day-modal-title {
+      font-size: 28px;
+      color: #ffffff;
+      font-weight: 800;
+      margin: 0;
+    }
+    .round-action {
+      width: 52px;
+      height: 52px;
+      border-radius: 999px;
+      border: none;
+      background: #ffffff;
+      color: #080808;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .day-modal-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-title {
+      color: #ffffff;
+      font-size: 22px;
+    }
+    .settings-panel {
+      background: #0b0b0b;
+      border-color: #2a2a2a;
+      border-radius: 16px;
+    }
+    .settings-label,
+    .settings-status-item strong {
+      color: #ffffff;
+    }
+    .settings-status-item {
+      color: #a1a1aa;
+    }
+    @media (max-width: 480px) {
+      body {
+        align-items: stretch;
+        background: #080808;
+      }
+      .device {
+        width: 100%;
+        min-height: 100dvh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      .topbar {
+        padding-top: max(14px, env(safe-area-inset-top));
+      }
+      .today-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .summary-item {
+        min-height: 0;
+      }
+      .calendar-cell {
+        min-height: 52px;
+        padding: 6px 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="device">
+    <div class="topbar">
+      <div>
+        <h1 id="headerDate">今日</h1>
+        <p class="sub">デイリー・ハブ</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button id="openSettings" class="icon-button" title="設定">⚙️</button>
+        <div class="sub" id="todayLabel"></div>
+      </div>
+    </div>
+    <main class="content">
+      <section id="goalView" class="screen-panel">
+        <section class="today-summary" aria-label="今日の状況">
+          <div class="summary-item">
+            <strong id="summaryGoalProgress">0/0</strong>
+            <span>継続中</span>
+          </div>
+          <div class="summary-item">
+            <strong id="summaryDiaryStatus">未記入</strong>
+            <span>日記</span>
+          </div>
+          <div class="summary-item">
+            <strong id="summaryScheduleCount">0件</strong>
+            <span>今日の予定</span>
+          </div>
+        </section>
+        <h2 class="section-title">ホーム</h2>
+        <div class="goal-tab-bar">
+          <button class="goal-tab-button active" data-goal-view="goalHome">一覧</button>
+          <button class="goal-tab-button" data-goal-view="goalContinue">継続</button>
+        </div>
+        <div id="goalHomeView">
+          <div class="card compact-card">
+            <div class="section-title">予定</div>
+            <div id="homeScheduleList" class="home-schedule-list"></div>
+          </div>
+          <div class="card">
+            <div style="margin-top:14px;">
+              <label class="section-title" for="goalMemo">メモ</label>
+              <textarea id="goalMemo" class="text-area" placeholder="今日の気づきや今日の一言をメモ"></textarea>
+            </div>
+            <div class="row" style="margin-top:12px;">
+              <button class="button" id="saveGoalMemo">保存</button>
+              <button class="button small ghost" id="clearGoalMemo">クリア</button>
+            </div>
+          </div>
+        </div>
+        <div id="goalContinueView" hidden>
+          <div class="card compact-card">
+            <div class="habit-head">
+              <div>
+                <div class="section-title">継続チェック</div>
+                <div class="sub-text">1〜3個まで管理できます</div>
+              </div>
+              <strong id="streakBadge" class="streak-badge">0日</strong>
+            </div>
+            <div id="habitList" style="margin-top:10px;"></div>
+            <button class="button small" id="addHabit">追加</button>
+          </div>
+          <div class="card habit-stats-card">
+            <div class="stat-grid">
+              <div class="stat-card">
+                <strong id="habitRate">0%</strong>
+                <span>今週の達成率</span>
+              </div>
+              <div class="stat-card">
+                <strong id="habitStreak">0日</strong>
+                <span>現在の連続達成</span>
+              </div>
+              <div class="stat-card">
+                <strong id="habitCount">0/0</strong>
+                <span>今週の達成日/日数</span>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title">週間レポート</div>
+            <div class="report-scroll">
+              <ul class="report-list" id="weeklyReport"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="diaryView" class="screen-panel" hidden>
+        <h2 class="section-title">日記</h2>
+        <div class="card">
+          <div class="calendar-header">
+            <button class="button small ghost" id="prevDiaryDay">前日</button>
+            <div class="calendar-month" id="diaryDateLabel">今日</div>
+            <button class="button small ghost" id="nextDiaryDay">翌日</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button class="button small ghost" id="toggleDiarySearch">過去を検索</button>
+            <div class="sub-text" style="align-self:center;">日付を遡って編集できます</div>
+          </div>
+          <div class="row">
+            <select id="moodSelect" class="select-input">
+              <option value="">気分を選択</option>
+              <option value="😊">😊 いい感じ</option>
+              <option value="😐">😐 ふつう</option>
+              <option value="😔">😔 さみしい</option>
+              <option value="😠">😠 いらいら</option>
+            </select>
+            <select id="weatherSelect" class="select-input">
+              <option value="">天気を選択</option>
+              <option value="☀️">☀️ 晴れ</option>
+              <option value="🌥️">🌥️ くもり</option>
+              <option value="🌧️">🌧️ 雨</option>
+              <option value="❄️">❄️ 雪</option>
+            </select>
+          </div>
+          <textarea id="diaryText" class="text-area" placeholder="日記をここに書きます。毎日書き残しましょう。"></textarea>
+          <div class="row">
+            <button class="button" id="saveDiary">保存</button>
+            <button class="button delete" id="deleteDiary">削除</button>
+          </div>
+          <div id="diarySearchPanel" hidden>
+            <input type="search" id="diarySearch" class="search-input" placeholder="キーワード検索で過去の日記を検索" />
+            <div class="calendar-event-list" id="diarySearchResults"></div>
+          </div>
+          <p class="status-text" id="diaryStatus"></p>
+        </div>
+      </section>
+
+      <section id="calendarView" class="screen-panel" hidden>
+        <h2 class="section-title">月間</h2>
+        <div class="card">
+          <div class="calendar-top">
+            <div></div>
+            <button class="button small today-button" id="todayCalendar">今月へ</button>
+          </div>
+          <div class="calendar-header">
+            <button class="button small ghost" id="prevCalendar">前</button>
+            <div class="calendar-month" id="calendarTitle">2026年5月</div>
+            <button class="button small ghost" id="nextCalendar">次</button>
+          </div>
+              <div id="calendarBody"></div>
+        </div>
+      </section>
+    </main>
+    <nav class="tab-bar">
+      <button class="tab-button active" data-view="goalView">
+        <span class="tab-icon">🏆</span>
+        <span class="tab-label">ホーム</span>
+      </button>
+      <button class="tab-button" data-view="diaryView">
+        <span class="tab-icon">📓</span>
+        <span class="tab-label">日記</span>
+      </button>
+      <button class="tab-button" data-view="calendarView">
+        <span class="tab-icon">📅</span>
+        <span class="tab-label">月間</span>
+      </button>
+    </nav>
+  </div>
+
+  <div class="modal hidden" id="eventModal">
+    <div class="modal-card">
+      <h3 class="modal-title" id="modalTitle">予定を追加</h3>
+      <input id="eventTitle" class="text-input" placeholder="タイトル" />
+      <div class="row" style="margin-top:10px;">
+        <input type="time" id="eventTime" class="time-input" />
+        <select id="eventReminder" class="select-input">
+          <option value="0">リマインダーなし</option>
+          <option value="15">15分前</option>
+          <option value="30">30分前</option>
+          <option value="45">45分前</option>
+          <option value="60">60分前</option>
+        </select>
+      </div>
+      <textarea id="eventMemo" class="text-area" placeholder="メモ"></textarea>
+      <div class="row modal-actions">
+        <button class="button" id="saveEvent">保存</button>
+        <button class="button ghost" id="cancelEvent">閉じる</button>
+      </div>
+      <p class="status-text" id="eventStatus"></p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="dayScheduleModal">
+    <div class="modal-card day-modal-card">
+      <div class="day-modal-top">
+        <h3 class="day-modal-title" id="dayScheduleTitle">6月1日 月曜日</h3>
+        <button class="round-action" id="addDaySchedule" title="予定を追加">+</button>
+      </div>
+      <div class="day-modal-body">
+        <div id="dayScheduleList" class="day-schedule-list"></div>
+      </div>
+      <div class="row modal-actions">
+        <button class="button ghost" id="closeDaySchedule">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="settingsModal">
+    <div class="modal-card">
+      <h3 class="modal-title">設定</h3>
+      <div class="settings-panel">
+        <label class="settings-label" for="dailyReminderTime">毎日の日記リマインダー</label>
+        <input type="time" id="dailyReminderTime" class="settings-input" />
+        <p class="settings-help">設定した時刻に、今日の日記が未入力なら通知します。</p>
+      </div>
+      <div class="settings-status-list" aria-live="polite">
+        <div class="settings-status-item"><span>通知</span><strong id="notificationState">未確認</strong></div>
+        <div class="settings-status-item"><span>Service Worker</span><strong id="serviceWorkerState">未登録</strong></div>
+        <div class="settings-status-item"><span>オフライン</span><strong id="offlineState">準備中</strong></div>
+      </div>
+      <div class="settings-row">
+        <button class="button" id="saveSettings">保存</button>
+        <button class="button ghost" id="requestPermission">通知許可を求める</button>
+        <button class="button ghost" id="testNotification">テスト通知</button>
+        <button class="button ghost" id="closeSettings">閉じる</button>
+      </div>
+      <p class="status-text" id="settingsStatus"></p>
+    </div>
+  </div>
+
+  <script>
+    const todayLabel = document.getElementById('todayLabel');
+    const headerDate = document.getElementById('headerDate');
+    const goalView = document.getElementById('goalView');
+    const diaryView = document.getElementById('diaryView');
+    const calendarView = document.getElementById('calendarView');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const goalMemo = document.getElementById('goalMemo');
+    const saveGoalMemoBtn = document.getElementById('saveGoalMemo');
+    const clearGoalMemoBtn = document.getElementById('clearGoalMemo');
+    const homeScheduleList = document.getElementById('homeScheduleList');
+    const habitList = document.getElementById('habitList');
+    const addHabitBtn = document.getElementById('addHabit');
+    const habitRate = document.getElementById('habitRate');
+    const habitStreak = document.getElementById('habitStreak');
+    const habitCount = document.getElementById('habitCount');
+    const streakBadge = document.getElementById('streakBadge');
+    const weeklyReport = document.getElementById('weeklyReport');
+    const diaryDateLabel = document.getElementById('diaryDateLabel');
+    const diaryText = document.getElementById('diaryText');
+    const saveDiaryBtn = document.getElementById('saveDiary');
+    const deleteDiaryBtn = document.getElementById('deleteDiary');
+    const diarySearchInput = document.getElementById('diarySearch');
+    const diarySearchResults = document.getElementById('diarySearchResults');
+    const toggleDiarySearchBtn = document.getElementById('toggleDiarySearch');
+    const diarySearchPanel = document.getElementById('diarySearchPanel');
+    const moodSelect = document.getElementById('moodSelect');
+    const weatherSelect = document.getElementById('weatherSelect');
+    const prevDiaryDay = document.getElementById('prevDiaryDay');
+    const nextDiaryDay = document.getElementById('nextDiaryDay');
+    const calendarTitle = document.getElementById('calendarTitle');
+    const calendarBody = document.getElementById('calendarBody');
+    const calendarDetails = document.getElementById('calendarDetails');
+    const prevCalendar = document.getElementById('prevCalendar');
+    const nextCalendar = document.getElementById('nextCalendar');
+    const todayCalendar = document.getElementById('todayCalendar');
+    const goalTabButtons = document.querySelectorAll('.goal-tab-button');
+    const goalHomeView = document.getElementById('goalHomeView');
+    const goalContinueView = document.getElementById('goalContinueView');
+    const showContinueView = document.getElementById('showContinueView');
+    const eventModal = document.getElementById('eventModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const eventTitle = document.getElementById('eventTitle');
+    const eventTime = document.getElementById('eventTime');
+    const eventMemo = document.getElementById('eventMemo');
+    const eventReminder = document.getElementById('eventReminder');
+    const saveEvent = document.getElementById('saveEvent');
+    const cancelEvent = document.getElementById('cancelEvent');
+    const diaryStatus = document.getElementById('diaryStatus');
+    const eventStatus = document.getElementById('eventStatus');
+    const dayScheduleModal = document.getElementById('dayScheduleModal');
+    const dayScheduleTitle = document.getElementById('dayScheduleTitle');
+    const dayScheduleList = document.getElementById('dayScheduleList');
+    const addDaySchedule = document.getElementById('addDaySchedule');
+    const closeDaySchedule = document.getElementById('closeDaySchedule');
+    const summaryGoalProgress = document.getElementById('summaryGoalProgress');
+    const summaryDiaryStatus = document.getElementById('summaryDiaryStatus');
+    const summaryScheduleCount = document.getElementById('summaryScheduleCount');
+    const openSettings = document.getElementById('openSettings');
+    const settingsModal = document.getElementById('settingsModal');
+    const dailyReminderTime = document.getElementById('dailyReminderTime');
+    const saveSettings = document.getElementById('saveSettings');
+    const requestPermission = document.getElementById('requestPermission');
+    const testNotification = document.getElementById('testNotification');
+    const closeSettings = document.getElementById('closeSettings');
+    const settingsStatus = document.getElementById('settingsStatus');
+    const notificationState = document.getElementById('notificationState');
+    const serviceWorkerState = document.getElementById('serviceWorkerState');
+    const offlineState = document.getElementById('offlineState');
+
+    const storageKey = 'dailyHubData_v1';
+    const settingsKey = 'dailyHubSettings_v1';
+    const today = new Date();
+    let diarySelectedDate = formatDateKey(today);
+    let calendarMode = 'month';
+    let calendarReference = new Date(today);
+    let selectedCalendarDate = formatDateKey(today);
+    let editingSchedule = null;
+    let reminderState = {};
+
+    function formatDateKey(date) {
+      if (typeof date === 'string') {
+        return date;
+      }
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatDateLabel(date) {
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const weekday = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()];
+      return `${year}年${month}月${day}日 (${weekday})`;
+    }
+
+    function formatMonthLabel(date) {
+      return `${date.getFullYear()}年${date.getMonth() + 1}月`;
+    }
+
+    function loadData() {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        return raw ? JSON.parse(raw) : { days: {} };
+      } catch (e) {
+        return { days: {} };
+      }
+    }
+
+    function saveData(data) {
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    }
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(settingsKey);
+        return raw ? JSON.parse(raw) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function saveAppSettings(settings) {
+      localStorage.setItem(settingsKey, JSON.stringify(settings));
+    }
+
+    function setSettingsStatus(message) {
+      settingsStatus.textContent = message;
+      if (message) {
+        setTimeout(() => {
+          if (settingsStatus.textContent === message) settingsStatus.textContent = '';
+        }, 1800);
+      }
+    }
+
+    function getNotificationLabel() {
+      if (!('Notification' in window)) return '非対応';
+      if (Notification.permission === 'granted') return '許可済み';
+      if (Notification.permission === 'denied') return 'ブロック中';
+      return '未許可';
+    }
+
+    function updateSettingsDisplay() {
+      const settings = loadSettings();
+      dailyReminderTime.value = settings.dailyReminderTime || '';
+      notificationState.textContent = getNotificationLabel();
+      serviceWorkerState.textContent = navigator.serviceWorker?.controller ? 'Activated' : '登録確認中';
+      offlineState.textContent = navigator.onLine ? '利用可能' : 'オフライン中';
+      requestPermission.disabled = !('Notification' in window) || Notification.permission !== 'default';
+    }
+
+    function getDefaultDay() {
+      return {
+        memo: '',
+        habits: [
+          { title: '習慣1', done: false }
+        ],
+        diary: '',
+        mood: '',
+        weather: '',
+        schedules: []
+      };
+    }
+
+    function getDay(key) {
+      const data = loadData();
+      const item = data.days?.[key] || {};
+      const habits = Array.isArray(item.habits)
+        ? item.habits.slice(0, 3).map((habit) => ({ title: habit.title || '', done: habit.done || false }))
+        : getDefaultDay().habits;
+      if (habits.length === 0) {
+        habits.push({ title: '習慣1', done: false });
+      }
+      const schedules = Array.isArray(item.schedules) ? item.schedules.slice() : [];
+      return {
+        ...getDefaultDay(),
+        ...item,
+        habits,
+        schedules
+      };
+    }
+
+    function setDay(key, dayData) {
+      const data = loadData();
+      data.days = data.days || {};
+      data.days[key] = dayData;
+      saveData(data);
+    }
+
+    function removeDiary(key) {
+      const data = loadData();
+      if (!data.days) return;
+      const day = data.days[key] || {};
+      day.diary = '';
+      day.mood = '';
+      day.weather = '';
+      data.days[key] = day;
+      saveData(data);
+    }
+
+    function removeSchedule(key, id) {
+      const day = getDay(key);
+      day.schedules = day.schedules.filter((event) => event.id !== id);
+      setDay(key, day);
+      renderTodaySummary();
+      renderHomeScheduleList();
+      if (!dayScheduleModal.classList.contains('hidden')) {
+        renderDayScheduleList(key);
+      }
+    }
+
+    function updateTodayLabel() {
+      const now = new Date();
+      const weekday = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'][now.getDay()];
+      headerDate.textContent = `${now.getMonth() + 1}月${now.getDate()}日 ${weekday}`;
+      todayLabel.textContent = formatDateLabel(now);
+    }
+
+    function renderTodaySummary() {
+      const day = getDay(formatDateKey(new Date()));
+      const stats = computeHabitStats();
+      summaryGoalProgress.textContent = `${stats.streak}日`;
+      summaryDiaryStatus.textContent = day.diary ? '記入済み' : '未記入';
+      summaryScheduleCount.textContent = `${day.schedules.length}件`;
+    }
+
+    function renderHomeScheduleList() {
+      const day = getDay(formatDateKey(new Date()));
+      homeScheduleList.innerHTML = '';
+      if (!day.schedules.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = '予定がありません';
+        homeScheduleList.appendChild(empty);
+        return;
+      }
+      day.schedules
+        .slice()
+        .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+        .slice(0, 4)
+        .forEach((event) => {
+          const line = document.createElement('button');
+          line.type = 'button';
+          line.className = 'schedule-line';
+          line.addEventListener('click', () => {
+            selectedCalendarDate = formatDateKey(new Date());
+            openEventModal(selectedCalendarDate, event.id);
+          });
+          const time = document.createElement('span');
+          time.className = 'schedule-time';
+          time.textContent = event.time || '--:--';
+          const title = document.createElement('span');
+          title.textContent = event.title;
+          line.appendChild(time);
+          line.appendChild(title);
+          homeScheduleList.appendChild(line);
+        });
+    }
+
+    function renderHabitList() {
+      const todayDay = getDay(formatDateKey(today));
+      habitList.innerHTML = '';
+      addHabitBtn.disabled = todayDay.habits.length >= 3;
+      addHabitBtn.textContent = todayDay.habits.length >= 3 ? '3/3' : `追加 ${todayDay.habits.length}/3`;
+      todayDay.habits.forEach((habit, index) => {
+        const row = document.createElement('div');
+        row.className = 'habit-item';
+        const toggle = document.createElement('button');
+        toggle.className = `habit-toggle ${habit.done ? 'done' : ''}`;
+        toggle.innerHTML = habit.done ? '✓' : '☆';
+        toggle.addEventListener('click', () => {
+          const day = getDay(formatDateKey(today));
+          day.habits[index].done = !day.habits[index].done;
+          setDay(formatDateKey(today), day);
+          renderGoalStats();
+          renderTodaySummary();
+          renderHabitList();
+          renderCalendarView();
+          // small celebration hint
+          if (day.habits[index].done) {
+            toggle.animate([
+              { transform: 'scale(1)' },
+              { transform: 'scale(1.15)' },
+              { transform: 'scale(1)' }
+            ], { duration: 260 });
+          }
+        });
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'habit-title';
+        input.value = habit.title;
+        input.placeholder = `継続目標 ${index + 1}`;
+        input.addEventListener('input', () => {
+          const day = getDay(formatDateKey(today));
+          day.habits[index].title = input.value;
+          setDay(formatDateKey(today), day);
+        });
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'habit-remove';
+        remove.textContent = '×';
+        remove.title = '削除';
+        remove.disabled = todayDay.habits.length <= 1;
+        remove.addEventListener('click', () => {
+          const day = getDay(formatDateKey(today));
+          if (day.habits.length <= 1) return;
+          day.habits.splice(index, 1);
+          setDay(formatDateKey(today), day);
+          renderHabitList();
+          renderGoalStats();
+          renderTodaySummary();
+        });
+        row.appendChild(toggle);
+        row.appendChild(input);
+        row.appendChild(remove);
+        habitList.appendChild(row);
+      });
+    }
+
+    function renderGoalMemo() {
+      const todayDay = getDay(formatDateKey(today));
+      goalMemo.value = todayDay.memo || '';
+    }
+
+    function saveGoalMemo() {
+      const todayDay = getDay(formatDateKey(today));
+      todayDay.memo = goalMemo.value;
+      setDay(formatDateKey(today), todayDay);
+      renderTodaySummary();
+    }
+
+    function clearGoalMemo() {
+      goalMemo.value = '';
+      saveGoalMemo();
+    }
+
+    function addHabit() {
+      const todayDay = getDay(formatDateKey(today));
+      if (todayDay.habits.length >= 3) return;
+      todayDay.habits.push({ title: `習慣${todayDay.habits.length + 1}`, done: false });
+      setDay(formatDateKey(today), todayDay);
+      renderHabitList();
+      renderGoalStats();
+      renderTodaySummary();
+    }
+
+    function getWeekKeys(referenceDate) {
+      const keys = [];
+      const date = new Date(referenceDate);
+      const start = new Date(date);
+      start.setDate(date.getDate() - 6);
+      for (let i = 0; i < 7; i += 1) {
+        const current = new Date(start);
+        current.setDate(start.getDate() + i);
+        keys.push(formatDateKey(current));
+      }
+      return keys;
+    }
+
+    function computeHabitStats() {
+      const keys = getWeekKeys(today);
+      let totalDays = 0;
+      let completedDays = 0;
+      let streak = 0;
+      keys.forEach((key) => {
+        const day = getDay(key);
+        const hasComplete = day.habits.some((habit) => habit.done);
+        if (hasComplete) completedDays += 1;
+        totalDays += 1;
+      });
+      const rate = totalDays ? Math.round((completedDays / totalDays) * 100) : 0;
+      let checkDate = new Date(today);
+      while (true) {
+        const day = getDay(formatDateKey(checkDate));
+        if (day.habits.some((habit) => habit.done)) {
+          streak += 1;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      return { rate, completedDays, totalDays, streak, keys };
+    }
+
+    function renderGoalStats() {
+      const stats = computeHabitStats();
+      habitRate.textContent = `${stats.rate}%`;
+      habitStreak.textContent = `${stats.streak}日`;
+      habitCount.textContent = `${stats.completedDays}/${stats.totalDays}`;
+      streakBadge.textContent = `${stats.streak}日`;
+      weeklyReport.innerHTML = '';
+      const todayKey = formatDateKey(today);
+      stats.keys.slice().reverse().forEach((key) => {
+        const date = new Date(key);
+        const label = `${date.getMonth() + 1}/${date.getDate()}`;
+        const day = getDay(key);
+        const doneCount = day.habits.filter((habit) => habit.done).length;
+        const li = document.createElement('li');
+        if (key === todayKey) li.classList.add('today-report');
+        li.innerHTML = `<span>${label}${key === todayKey ? ' 今日' : ''}</span><span>${doneCount} / ${day.habits.length}</span>`;
+        weeklyReport.appendChild(li);
+      });
+    }
+
+    function updateDiaryDisplay() {
+      const date = new Date(diarySelectedDate);
+      diaryDateLabel.textContent = formatDateLabel(date);
+      const data = getDay(diarySelectedDate);
+      diaryText.value = data.diary || '';
+      moodSelect.value = data.mood || '';
+      weatherSelect.value = data.weather || '';
+      deleteDiaryBtn.disabled = !data.diary;
+    }
+
+    function saveDiary() {
+      const day = getDay(diarySelectedDate);
+      day.diary = diaryText.value;
+      day.mood = moodSelect.value;
+      day.weather = weatherSelect.value;
+      setDay(diarySelectedDate, day);
+      diaryStatus.textContent = '保存しました';
+      setTimeout(() => { diaryStatus.textContent = ''; }, 1200);
+      renderTodaySummary();
+      renderCalendarView();
+    }
+
+    function deleteDiary() {
+      if (!confirm('この日記を削除しますか？')) return;
+      const day = getDay(diarySelectedDate);
+      day.diary = '';
+      day.mood = '';
+      day.weather = '';
+      setDay(diarySelectedDate, day);
+      updateDiaryDisplay();
+      diaryStatus.textContent = '削除しました';
+      setTimeout(() => { diaryStatus.textContent = ''; }, 1200);
+      renderTodaySummary();
+      renderCalendarView();
+    }
+
+    function buildDiarySearch() {
+      const keyword = diarySearchInput.value.trim().toLowerCase();
+      const data = loadData();
+      const entries = Object.entries(data.days || {}).filter(([key, day]) => {
+        return day.diary && day.diary.toLowerCase().includes(keyword);
+      }).sort((a, b) => b[0].localeCompare(a[0]));
+      diarySearchResults.innerHTML = '';
+      if (entries.length === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'sub-text';
+        empty.textContent = keyword ? '検索結果はありません。' : 'キーワードで過去の日記を探せます。';
+        diarySearchResults.appendChild(empty);
+        return;
+      }
+      entries.forEach(([key, day]) => {
+        const item = document.createElement('div');
+        item.className = 'detail-item';
+        item.style.cursor = 'pointer';
+        item.addEventListener('click', () => {
+          diarySelectedDate = key;
+          updateDiaryDisplay();
+          renderCalendarView();
+          diarySearchInput.blur();
+        });
+        const header = document.createElement('div');
+        header.className = 'item-header';
+        header.textContent = `${formatDateLabel(new Date(key))} ${day.mood || ''} ${day.weather || ''}`.trim();
+        const body = document.createElement('div');
+        body.className = 'item-body';
+        body.textContent = day.diary.length > 80 ? `${day.diary.slice(0, 80)}…` : day.diary;
+        item.appendChild(header);
+        item.appendChild(body);
+        diarySearchResults.appendChild(item);
+      });
+    }
+
+    function setCalendarMode(mode) {
+      calendarMode = mode;
+      renderCalendarView();
+    }
+
+    function adjustCalendar(offset) {
+      if (calendarMode === 'month') {
+        calendarReference.setMonth(calendarReference.getMonth() + offset);
+      } else {
+        calendarReference.setDate(calendarReference.getDate() + offset * 7);
+      }
+      renderCalendarView();
+    }
+
+    function openEventModal(dateKey, eventId = null) {
+      const day = getDay(dateKey);
+      selectedCalendarDate = dateKey;
+      dayScheduleModal.classList.add('hidden');
+      if (eventId) {
+        const event = day.schedules.find((ev) => ev.id === eventId);
+        if (!event) return;
+        editingSchedule = eventId;
+        modalTitle.textContent = '予定を編集';
+        eventTitle.value = event.title;
+        eventTime.value = event.time || '';
+        eventMemo.value = event.memo || '';
+        eventReminder.value = event.reminder || '0';
+      } else {
+        editingSchedule = null;
+        modalTitle.textContent = '予定を追加';
+        eventTitle.value = '';
+        eventTime.value = '';
+        eventMemo.value = '';
+        eventReminder.value = '0';
+      }
+      eventStatus.textContent = '';
+      eventModal.classList.remove('hidden');
+    }
+
+    function closeEventModal() {
+      eventModal.classList.add('hidden');
+    }
+
+    function saveEventEntry() {
+      const title = eventTitle.value.trim();
+      if (!title) {
+        eventStatus.textContent = 'タイトルを入力してください。';
+        return;
+      }
+      const day = getDay(selectedCalendarDate);
+      if (!day.schedules) day.schedules = [];
+      if (editingSchedule) {
+        const existing = day.schedules.find((ev) => ev.id === editingSchedule);
+        if (existing) {
+          existing.title = title;
+          existing.time = eventTime.value;
+          existing.memo = eventMemo.value;
+          existing.reminder = Number(eventReminder.value);
+        }
+      } else {
+        const id = `sch_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        day.schedules.push({ id, title, time: eventTime.value, memo: eventMemo.value, reminder: Number(eventReminder.value) });
+      }
+      setDay(selectedCalendarDate, day);
+      closeEventModal();
+      renderTodaySummary();
+      renderHomeScheduleList();
+      renderCalendarView();
+    }
+
+    function renderCalendarView() {
+      calendarTitle.textContent = formatMonthLabel(calendarReference);
+      calendarBody.className = 'calendar-grid';
+      calendarBody.innerHTML = '';
+      if (calendarMode === 'month') {
+        renderMonthCalendar();
+      } else if (calendarMode === 'week') {
+        renderWeekCalendar();
+      } else {
+        renderDayCalendar();
+      }
+    }
+
+    function renderMonthCalendar() {
+      const first = new Date(calendarReference.getFullYear(), calendarReference.getMonth(), 1);
+      const startDay = first.getDay();
+      const daysInMonth = new Date(calendarReference.getFullYear(), calendarReference.getMonth() + 1, 0).getDate();
+      ['日','月','火','水','木','金','土'].forEach((label) => {
+        const head = document.createElement('div');
+        head.className = 'calendar-head';
+        head.textContent = label;
+        calendarBody.appendChild(head);
+      });
+      for (let i = 0; i < startDay; i += 1) {
+        const blank = document.createElement('div');
+        blank.className = 'calendar-cell';
+        blank.style.background = 'transparent';
+        blank.style.border = 'none';
+        calendarBody.appendChild(blank);
+      }
+      for (let date = 1; date <= daysInMonth; date += 1) {
+        const cellDate = new Date(calendarReference.getFullYear(), calendarReference.getMonth(), date);
+        const key = formatDateKey(cellDate);
+        const day = getDay(key);
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell';
+        if (key === selectedCalendarDate) cell.classList.add('selected');
+        const number = document.createElement('div');
+        number.className = 'date-number';
+        number.textContent = date;
+        cell.appendChild(number);
+        const tags = document.createElement('div');
+        tags.className = 'tags';
+        if (day.schedules.length > 0) {
+          const mark = document.createElement('span');
+          mark.className = 'calendar-tag';
+          mark.textContent = `${day.schedules.length}件`;
+          tags.appendChild(mark);
+        }
+        cell.appendChild(tags);
+        cell.addEventListener('click', () => {
+          selectedCalendarDate = key;
+          diarySelectedDate = key;
+          updateDiaryDisplay();
+          renderCalendarView();
+          openDayScheduleModal(key);
+        });
+        calendarBody.appendChild(cell);
+      }
+    }
+
+    function renderWeekCalendar() {
+      const start = new Date(calendarReference);
+      const dayOfWeek = start.getDay();
+      start.setDate(start.getDate() - dayOfWeek);
+      ['日','月','火','水','木','金','土'].forEach((label) => {
+        const head = document.createElement('div');
+        head.className = 'calendar-head';
+        head.textContent = label;
+        calendarBody.appendChild(head);
+      });
+      for (let i = 0; i < 7; i += 1) {
+        const cellDate = new Date(start);
+        cellDate.setDate(start.getDate() + i);
+        const key = formatDateKey(cellDate);
+        const day = getDay(key);
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell';
+        if (key === selectedCalendarDate) cell.classList.add('selected');
+        const number = document.createElement('div');
+        number.className = 'date-number';
+        number.textContent = `${cellDate.getMonth() + 1}/${cellDate.getDate()}`;
+        cell.appendChild(number);
+        const tags = document.createElement('div');
+        tags.className = 'tags';
+        if (day.schedules.length > 0) tags.appendChild(createTag(`${day.schedules.length}件`));
+        cell.appendChild(tags);
+        cell.addEventListener('click', () => {
+          selectedCalendarDate = key;
+          diarySelectedDate = key;
+          updateDiaryDisplay();
+          renderCalendarView();
+          openDayScheduleModal(key);
+        });
+        calendarBody.appendChild(cell);
+      }
+    }
+
+    function renderDayCalendar() {
+      const cellDate = new Date(calendarReference);
+      const key = formatDateKey(cellDate);
+      const day = getDay(key);
+      const cell = document.createElement('div');
+      cell.className = 'calendar-cell';
+      cell.style.gridColumn = 'span 7';
+      const number = document.createElement('div');
+      number.className = 'date-number';
+      number.textContent = formatDateLabel(cellDate);
+      cell.appendChild(number);
+      const tags = document.createElement('div');
+      tags.className = 'tags';
+      if (day.schedules.length > 0) tags.appendChild(createTag(`${day.schedules.length}件`));
+      cell.appendChild(tags);
+      cell.addEventListener('click', () => {
+        selectedCalendarDate = key;
+        diarySelectedDate = key;
+        updateDiaryDisplay();
+        renderCalendarView();
+        openDayScheduleModal(key);
+      });
+      calendarBody.appendChild(cell);
+    }
+
+    function createTag(text) {
+      const tag = document.createElement('span');
+      tag.className = 'calendar-tag';
+      tag.textContent = text;
+      return tag;
+    }
+
+    function renderCalendarDetails(key) {
+      if (!calendarDetails) return;
+      const day = getDay(key);
+      calendarDetails.innerHTML = '';
+      const date = new Date(key);
+      const header = document.createElement('div');
+      header.className = 'detail-item';
+      const h3 = document.createElement('h3');
+      h3.textContent = formatDateLabel(date);
+      const note = document.createElement('div');
+      note.className = 'item-body';
+      note.textContent = day.memo || '今日はありません。';
+      header.appendChild(h3);
+      header.appendChild(note);
+      calendarDetails.appendChild(header);
+
+      // 日記表示はカレンダー側では表示しない（カレンダーには予定のみ表示）
+
+      const scheduleCard = document.createElement('div');
+      scheduleCard.className = 'detail-card';
+      const scheduleTitle = document.createElement('h3');
+      scheduleTitle.textContent = '予定';
+      scheduleCard.appendChild(scheduleTitle);
+      if (day.schedules.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'item-body';
+        empty.textContent = '予定がありません。';
+        scheduleCard.appendChild(empty);
+      } else {
+        day.schedules.sort((a, b) => (a.time || '').localeCompare(b.time || '')).forEach((event) => {
+          const item = document.createElement('div');
+          item.className = 'detail-item';
+          const header = document.createElement('div');
+          header.className = 'item-header';
+          header.textContent = `${event.time || '時間未設定'} ${event.title}`;
+          const actions = document.createElement('div');
+          const editBtn = document.createElement('button');
+          editBtn.className = 'button small ghost';
+          editBtn.textContent = '編集';
+          editBtn.addEventListener('click', () => openEventModal(key, event.id));
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'button small ghost';
+          removeBtn.textContent = '削除';
+          removeBtn.addEventListener('click', () => {
+            removeSchedule(key, event.id);
+            renderCalendarView();
+          });
+          actions.appendChild(editBtn);
+          actions.appendChild(removeBtn);
+          const body = document.createElement('div');
+          body.className = 'item-body';
+          body.textContent = event.memo || 'メモなし';
+          const reminder = document.createElement('div');
+          reminder.className = 'small-note';
+          reminder.textContent = event.reminder ? `リマインダー ${event.reminder}分前` : 'リマインダーなし';
+          item.appendChild(header);
+          item.appendChild(body);
+          item.appendChild(reminder);
+          item.appendChild(actions);
+          scheduleCard.appendChild(item);
+        });
+      }
+      const addButton = document.createElement('button');
+      addButton.className = 'button small';
+      addButton.textContent = '予定を追加';
+      addButton.addEventListener('click', () => openEventModal(key));
+      scheduleCard.appendChild(addButton);
+      calendarDetails.appendChild(scheduleCard);
+    }
+
+    function formatShortDateLabel(key) {
+      const date = new Date(key);
+      const weekday = ['日曜日', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日'][date.getDay()];
+      return `${date.getMonth() + 1}月${date.getDate()}日 ${weekday}`;
+    }
+
+    function renderDayScheduleList(key) {
+      const day = getDay(key);
+      dayScheduleTitle.textContent = formatShortDateLabel(key);
+      dayScheduleList.innerHTML = '';
+      if (!day.schedules.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = '予定がありません';
+        dayScheduleList.appendChild(empty);
+        return;
+      }
+      day.schedules
+        .slice()
+        .sort((a, b) => (a.time || '').localeCompare(b.time || ''))
+        .forEach((event) => {
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.className = 'schedule-line';
+          item.addEventListener('click', () => openEventModal(key, event.id));
+          const time = document.createElement('span');
+          time.className = 'schedule-time';
+          time.textContent = event.time || '--:--';
+          const body = document.createElement('span');
+          body.textContent = event.title;
+          item.appendChild(time);
+          item.appendChild(body);
+          dayScheduleList.appendChild(item);
+        });
+    }
+
+    function openDayScheduleModal(key) {
+      selectedCalendarDate = key;
+      diarySelectedDate = key;
+      renderDayScheduleList(key);
+      dayScheduleModal.classList.remove('hidden');
+    }
+
+    function closeDayScheduleModal() {
+      dayScheduleModal.classList.add('hidden');
+    }
+
+    async function registerServiceWorker() {
+      if (!('serviceWorker' in navigator)) {
+        serviceWorkerState.textContent = '非対応';
+        offlineState.textContent = '非対応';
+        return null;
+      }
+      try {
+        const registration = await navigator.serviceWorker.register('sw.js');
+        await navigator.serviceWorker.ready;
+        serviceWorkerState.textContent = registration.active ? 'Activated' : '登録済み';
+        offlineState.textContent = 'キャッシュ済み';
+        return registration;
+      } catch (error) {
+        serviceWorkerState.textContent = '登録失敗';
+        offlineState.textContent = '未対応';
+        console.warn('Service Worker registration failed:', error);
+        return null;
+      }
+    }
+
+    async function requestNotificationPermission() {
+      if (!('Notification' in window)) {
+        setSettingsStatus('このブラウザは通知に対応していません');
+        updateSettingsDisplay();
+        return false;
+      }
+      if (Notification.permission === 'granted') {
+        updateSettingsDisplay();
+        return true;
+      }
+      if (Notification.permission === 'denied') {
+        setSettingsStatus('ブラウザ設定で通知がブロックされています');
+        updateSettingsDisplay();
+        return false;
+      }
+      const permission = await Notification.requestPermission();
+      updateSettingsDisplay();
+      setSettingsStatus(permission === 'granted' ? '通知を許可しました' : '通知は未許可です');
+      return permission === 'granted';
+    }
+
+    async function sendBrowserNotification(title, options = {}) {
+      if (!('Notification' in window) || Notification.permission !== 'granted') {
+        alert(`${title}\n${options.body || ''}`.trim());
+        return false;
+      }
+      const registration = 'serviceWorker' in navigator ? await navigator.serviceWorker.ready.catch(() => null) : null;
+      if (registration?.showNotification) {
+        await registration.showNotification(title, {
+          icon: 'icon-192.png',
+          badge: 'icon-192.png',
+          tag: options.tag || `daily-hub-${Date.now()}`,
+          renotify: true,
+          ...options
+        });
+      } else {
+        new Notification(title, {
+          icon: 'icon-192.png',
+          ...options
+        });
+      }
+      return true;
+    }
+
+    function saveSettingsEntry() {
+      const settings = loadSettings();
+      settings.dailyReminderTime = dailyReminderTime.value;
+      saveAppSettings(settings);
+      updateSettingsDisplay();
+      setSettingsStatus(settings.dailyReminderTime ? '日記リマインダーを保存しました' : '日記リマインダーを解除しました');
+    }
+
+    async function notifySchedule(event, key) {
+      const title = `予定の通知 ${event.title}`;
+      const body = `${formatDateLabel(new Date(key))} ${event.time || ''}`.trim();
+      await sendBrowserNotification(title, { body, tag: `schedule-${key}-${event.id}` });
+    }
+
+    async function notifyDiaryReminder(settings, todayKey) {
+      const title = '日記リマインダー';
+      const body = '今日のことを少しだけ書き残しましょう。';
+      await sendBrowserNotification(title, { body, tag: `diary-${todayKey}` });
+      settings.lastDiaryReminderDate = todayKey;
+      saveAppSettings(settings);
+    }
+
+    function checkReminders() {
+      const data = loadData();
+      const now = new Date();
+      const nowTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const todayKey = formatDateKey(now);
+      const settings = loadSettings();
+      if (settings.dailyReminderTime === nowTime && settings.lastDiaryReminderDate !== todayKey) {
+        const day = getDay(todayKey);
+        if (!day.diary) {
+          notifyDiaryReminder(settings, todayKey);
+        } else {
+          settings.lastDiaryReminderDate = todayKey;
+          saveAppSettings(settings);
+        }
+      }
+      Object.entries(data.days || {}).forEach(([key, day]) => {
+        if (!Array.isArray(day.schedules)) return;
+        day.schedules.forEach((event) => {
+          if (!event.reminder || !event.time) return;
+          const eventDate = new Date(`${key}T${event.time}:00`);
+          const remindAt = new Date(eventDate.getTime() - event.reminder * 60000);
+          const id = `${key}_${event.id}`;
+          if (now >= remindAt && now < new Date(remindAt.getTime() + 60000) && !reminderState[id]) {
+            reminderState[id] = true;
+            notifySchedule(event, key);
+          }
+        });
+      });
+    }
+
+    function initEvents() {
+      tabButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const view = button.dataset.view;
+          tabButtons.forEach((btn) => btn.classList.toggle('active', btn === button));
+          goalView.hidden = view !== 'goalView';
+          diaryView.hidden = view !== 'diaryView';
+          calendarView.hidden = view !== 'calendarView';
+          if (view === 'calendarView') {
+            renderCalendarView();
+          }
+        });
+      });
+      saveGoalMemoBtn.addEventListener('click', () => { saveGoalMemo(); });
+      clearGoalMemoBtn.addEventListener('click', clearGoalMemo);
+      addHabitBtn.addEventListener('click', addHabit);
+      saveDiaryBtn.addEventListener('click', saveDiary);
+      deleteDiaryBtn.addEventListener('click', deleteDiary);
+      diarySearchInput.addEventListener('input', buildDiarySearch);
+      if (toggleDiarySearchBtn) {
+        toggleDiarySearchBtn.addEventListener('click', () => {
+          diarySearchPanel.hidden = !diarySearchPanel.hidden;
+          if (!diarySearchPanel.hidden) diarySearchInput.focus();
+        });
+      }
+      prevDiaryDay.addEventListener('click', () => {
+        const date = new Date(diarySelectedDate);
+        date.setDate(date.getDate() - 1);
+        diarySelectedDate = formatDateKey(date);
+        updateDiaryDisplay();
+        renderCalendarView();
+      });
+      nextDiaryDay.addEventListener('click', () => {
+        const date = new Date(diarySelectedDate);
+        date.setDate(date.getDate() + 1);
+        diarySelectedDate = formatDateKey(date);
+        updateDiaryDisplay();
+        renderCalendarView();
+      });
+      prevCalendar.addEventListener('click', () => adjustCalendar(-1));
+      nextCalendar.addEventListener('click', () => adjustCalendar(1));
+      todayCalendar.addEventListener('click', () => {
+        calendarReference = new Date(today);
+        selectedCalendarDate = formatDateKey(today);
+        diarySelectedDate = formatDateKey(today);
+        renderCalendarView();
+      });
+      goalTabButtons.forEach((button) => {
+        button.addEventListener('click', () => { setGoalTab(button.dataset.goalView); });
+      });
+      if (showContinueView) {
+        showContinueView.addEventListener('click', () => { setGoalTab('goalContinue'); });
+      }
+      saveEvent.addEventListener('click', saveEventEntry);
+      cancelEvent.addEventListener('click', closeEventModal);
+      eventModal.addEventListener('click', (event) => {
+        if (event.target === eventModal) closeEventModal();
+      });
+      addDaySchedule.addEventListener('click', () => {
+        closeDayScheduleModal();
+        openEventModal(selectedCalendarDate);
+      });
+      closeDaySchedule.addEventListener('click', closeDayScheduleModal);
+      dayScheduleModal.addEventListener('click', (event) => {
+        if (event.target === dayScheduleModal) closeDayScheduleModal();
+      });
+      openSettings.addEventListener('click', () => {
+        updateSettingsDisplay();
+        settingsModal.classList.remove('hidden');
+      });
+      closeSettings.addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+      });
+      settingsModal.addEventListener('click', (event) => {
+        if (event.target === settingsModal) settingsModal.classList.add('hidden');
+      });
+      saveSettings.addEventListener('click', saveSettingsEntry);
+      requestPermission.addEventListener('click', requestNotificationPermission);
+      testNotification.addEventListener('click', async () => {
+        const permitted = await requestNotificationPermission();
+        if (permitted) {
+          await sendBrowserNotification('テスト通知', { body: '日記リマインダーの通知準備ができています。', tag: 'daily-hub-test' });
+          setSettingsStatus('テスト通知を送信しました');
+        }
+      });
+      window.addEventListener('online', updateSettingsDisplay);
+      window.addEventListener('offline', updateSettingsDisplay);
+    }
+
+    function setGoalTab(tab) {
+      const showHome = tab === 'goalHome';
+      goalHomeView.hidden = !showHome;
+      goalContinueView.hidden = showHome;
+      goalView.classList.toggle('continue-mode', !showHome);
+      goalTabButtons.forEach((button) => button.classList.toggle('active', button.dataset.goalView === tab));
+    }
+
+    function init() {
+      updateTodayLabel();
+      renderGoalMemo();
+      renderHabitList();
+      renderGoalStats();
+      renderTodaySummary();
+      renderHomeScheduleList();
+      updateDiaryDisplay();
+      buildDiarySearch();
+      renderCalendarView();
+      setGoalTab('goalHome');
+      initEvents();
+      updateSettingsDisplay();
+      registerServiceWorker().then(updateSettingsDisplay);
+      setInterval(checkReminders, 30000);
+    }
+
+    init();
+  </script>
+</body>
+</html>
