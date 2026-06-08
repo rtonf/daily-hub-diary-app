@@ -1,6 +1,6 @@
 {
   "name": "my-diary-app",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "日記、今日の予定、継続チェック、リマインダーをまとめるPWA/Androidアプリ",
   "main": "index.html",
   "scripts": {
