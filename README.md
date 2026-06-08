@@ -1,16 +1,17 @@
 # デイリー・ハブ
 
-日記、毎日の目標、予定、リマインダーを一画面中心で管理するPWA/Androidアプリです。
+日記、今日の予定、継続チェック、リマインダーを1画面にまとめて管理するPWA/Androidアプリです。
 
 ## 主な機能
 
-- 日記メモ
-- 毎日の予定管理
-- 継続チェック
+- 今日の予定一覧と予定追加
+- 日記の保存、削除、過去検索
+- 1〜3個の継続チェック
 - 週間レポート
+- 月間カレンダー
 - ブラウザ通知リマインダー
 - PWA対応
-- CapacitorによるAndroid APK化
+- CapacitorによるAndroid APKビルド
 
 ## 開発環境
 
@@ -27,7 +28,7 @@ npm install
 npm run serve
 ```
 
-ブラウザで開く:
+ブラウザで開きます。
 
 ```text
 http://localhost:3000/index.html
@@ -57,10 +58,10 @@ android\app\build\outputs\apk\debug\app-debug.apk
 
 このリポジトリには、アプリのソースコード、PWA設定、Androidプロジェクト設定、ビルド手順を含めます。
 
-以下は公開対象外です。
+公開対象外の例:
 
 - `node_modules`
-- APKやAABなどのビルド成果物
+- APK/AABなどのビルド成果物
 - 検証スクリーンショット
 - ブラウザ検証プロファイル
 - Android Studioの個人設定

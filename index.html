@@ -6,7 +6,7 @@
   <title>デイリー目標・日記・カレンダー</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon-192.png" />
-  <meta name="theme-color" content="#4f46e5" />
+  <meta name="theme-color" content="#080808" />
   <style>
     :root {
       color-scheme: light;
@@ -1106,6 +1106,475 @@
         padding: 6px 5px;
       }
     }
+    /* Polished production pass */
+    :root {
+      --bg: #080808;
+      --panel: #111111;
+      --panel-soft: #161616;
+      --panel-raised: #1c1c1c;
+      --line: #2d2d2d;
+      --line-soft: #242424;
+      --text: #f7f7f8;
+      --muted: #a3a3ad;
+      --dim: #73737d;
+      --accent: #b8a7ff;
+      --accent-strong: #d7ccff;
+      --positive: #35c483;
+      --warning: #f4b942;
+      --danger: #ef4444;
+      --info: #7cc7ff;
+      --radius: 8px;
+      --tap: 44px;
+    }
+    html {
+      background: var(--bg);
+    }
+    body {
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    .device {
+      max-width: 430px;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .topbar {
+      padding: max(18px, env(safe-area-inset-top)) 18px 12px;
+      border-bottom-color: var(--line-soft);
+    }
+    .topbar h1 {
+      font-size: clamp(24px, 7vw, 32px);
+      font-weight: 850;
+      line-height: 1.08;
+      overflow-wrap: anywhere;
+    }
+    .topbar .sub {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-weight: 650;
+    }
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .icon-button {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1;
+    }
+    .content {
+      padding: 14px 16px 10px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #3a3a3a transparent;
+    }
+    .screen-panel {
+      min-height: 100%;
+      gap: 12px;
+      overflow: visible;
+    }
+    .card,
+    .detail-card,
+    .summary-item,
+    .settings-panel,
+    .modal-card {
+      border-radius: var(--radius);
+      background: var(--panel);
+      border-color: var(--line);
+      box-shadow: none;
+    }
+    .card {
+      padding: 16px;
+    }
+    .section-title {
+      font-size: 20px;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      font-weight: 850;
+    }
+    #goalView > .section-title,
+    #diaryView > .section-title,
+    #calendarView > .section-title {
+      font-size: 30px;
+      margin: 8px 0 10px;
+    }
+    .today-summary {
+      gap: 8px;
+      margin-bottom: 2px;
+    }
+    .summary-item {
+      min-height: 68px;
+      padding: 11px 10px;
+      background: var(--panel-soft);
+    }
+    .summary-item strong {
+      font-size: clamp(18px, 5vw, 24px);
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .summary-item span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .goal-tab-bar {
+      padding: 4px;
+      border-radius: 10px;
+      background: var(--panel-soft);
+      margin-bottom: 0;
+    }
+    .goal-tab-button {
+      min-height: var(--tap);
+      border-radius: 7px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    .goal-tab-button.active {
+      background: var(--accent);
+      color: #15111f;
+    }
+    #goalHomeView {
+      grid-template-rows: minmax(132px, auto) minmax(246px, 1fr);
+      gap: 10px;
+      overflow: visible;
+    }
+    #goalContinueView {
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      overflow: visible;
+    }
+    .memo-block {
+      margin-top: 0;
+    }
+    .action-row {
+      margin-top: 12px;
+    }
+    .home-schedule-list,
+    .day-schedule-list {
+      gap: 0;
+      overflow-y: auto;
+    }
+    .schedule-line {
+      grid-template-columns: 66px minmax(0, 1fr);
+      min-height: 52px;
+      padding: 10px 0;
+      font-size: 16px;
+      border-bottom-color: var(--line-soft);
+    }
+    .schedule-time {
+      color: var(--accent-strong);
+      font-size: 14px;
+      font-weight: 850;
+    }
+    .schedule-line span:last-child {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .empty-state {
+      min-height: 88px;
+      color: var(--muted);
+      font-size: 16px;
+      font-weight: 800;
+    }
+    .text-area,
+    .text-input,
+    .search-input,
+    .select-input,
+    .time-input,
+    .settings-input {
+      min-height: var(--tap);
+      border-radius: var(--radius);
+      background: #090909;
+      border-color: #343434;
+      color: var(--text);
+      font-size: 16px;
+    }
+    .text-area:focus,
+    .text-input:focus,
+    .search-input:focus,
+    .select-input:focus,
+    .time-input:focus,
+    .settings-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(184, 167, 255, 0.18);
+    }
+    #goalMemo {
+      min-height: 116px;
+      max-height: 160px;
+    }
+    .button {
+      min-height: var(--tap);
+      border-radius: var(--radius);
+      font-weight: 850;
+      transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+    }
+    .button.delete[disabled] {
+      background: #251515;
+      color: #8f6d6d;
+      border: 1px solid #3a2020;
+      opacity: 1;
+    }
+    .button.small {
+      min-height: 40px;
+      border-radius: 7px;
+    }
+    .button:focus-visible,
+    .goal-tab-button:focus-visible,
+    .tab-button:focus-visible,
+    .icon-button:focus-visible,
+    .habit-toggle:focus-visible,
+    .habit-remove:focus-visible,
+    .round-action:focus-visible {
+      outline: 3px solid rgba(184, 167, 255, 0.48);
+      outline-offset: 2px;
+    }
+    .habit-head {
+      align-items: center;
+    }
+    .habit-list {
+      margin-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+    #goalContinueView .habit-item,
+    .habit-item {
+      min-height: 54px;
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      background: #0c0c0c;
+    }
+    .habit-toggle {
+      width: 36px;
+      height: 36px;
+      border-width: 1px;
+      border-radius: 50%;
+      font-size: 15px;
+    }
+    .habit-toggle.done {
+      background: var(--positive);
+    }
+    .habit-title,
+    .habit-item input[type="text"] {
+      font-size: 16px;
+      padding-left: 2px;
+    }
+    .habit-remove {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+    }
+    .streak-badge {
+      min-width: 74px;
+      min-height: 40px;
+      border-radius: var(--radius);
+      background: #2a1d14;
+      color: #ffd18a;
+      font-size: 18px;
+    }
+    .report-scroll {
+      max-height: 210px;
+    }
+    .report-list li {
+      align-items: center;
+      padding: 10px 0;
+      font-size: 14px;
+    }
+    .report-list li.today-report {
+      background: rgba(184, 167, 255, 0.12);
+      border: 1px solid rgba(184, 167, 255, 0.22);
+      border-radius: var(--radius);
+      padding: 10px;
+    }
+    .diary-tools {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    #diaryView .card {
+      display: grid;
+      gap: 12px;
+    }
+    #diaryText {
+      min-height: 220px;
+    }
+    #diarySearchPanel {
+      display: grid;
+      gap: 10px;
+    }
+    #diarySearchPanel[hidden] {
+      display: none;
+    }
+    .calendar-top {
+      justify-content: flex-end;
+      margin-bottom: 8px;
+    }
+    .calendar-header {
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .calendar-month {
+      font-size: 18px;
+      font-weight: 850;
+    }
+    .calendar-grid {
+      gap: 4px;
+      border: none;
+    }
+    .calendar-head,
+    .calendar-cell {
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      background: #0b0b0b;
+    }
+    .calendar-head {
+      min-height: 28px;
+      display: grid;
+      place-items: center;
+      padding: 4px;
+      color: var(--dim);
+      font-weight: 800;
+      font-size: 12px;
+    }
+    .calendar-cell {
+      min-height: 58px;
+      padding: 7px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .calendar-cell.blank {
+      visibility: hidden;
+    }
+    .calendar-cell.today {
+      border-color: rgba(184, 167, 255, 0.58);
+      background: rgba(184, 167, 255, 0.08);
+    }
+    .calendar-cell.selected {
+      background: var(--panel-raised);
+      box-shadow: inset 0 0 0 2px var(--accent);
+    }
+    .calendar-cell.has-content .date-number::after {
+      content: "";
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      margin-left: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      vertical-align: middle;
+    }
+    .calendar-cell .date-number {
+      font-size: 15px;
+      line-height: 1;
+    }
+    .calendar-cell .tags {
+      margin-top: auto;
+      gap: 3px;
+    }
+    .calendar-tag {
+      max-width: 100%;
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: rgba(124, 199, 255, 0.14);
+      color: var(--info);
+      font-size: 10px;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .calendar-tag.diary-tag {
+      background: rgba(244, 185, 66, 0.14);
+      color: #ffd37a;
+    }
+    .calendar-tag.habit-tag {
+      background: rgba(53, 196, 131, 0.14);
+      color: #84e6b6;
+    }
+    .modal {
+      padding: 16px;
+      align-items: flex-end;
+    }
+    .modal-card {
+      max-width: 430px;
+      padding: 18px;
+      border-radius: 12px 12px 0 0;
+    }
+    .modal-title,
+    .day-modal-title {
+      font-size: 22px;
+      line-height: 1.2;
+    }
+    .day-modal-card {
+      height: min(680px, calc(100dvh - 24px));
+      padding: 18px;
+    }
+    .round-action {
+      width: 48px;
+      height: 48px;
+      font-size: 28px;
+    }
+    .settings-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .settings-row .button {
+      width: 100%;
+    }
+    .tab-bar {
+      min-height: 72px;
+      padding: 8px 14px max(10px, env(safe-area-inset-bottom));
+      background: rgba(8, 8, 8, 0.96);
+    }
+    .tab-button {
+      min-height: 54px;
+      border-radius: var(--radius);
+      gap: 4px;
+    }
+    .tab-button.active {
+      background: rgba(184, 167, 255, 0.12);
+    }
+    .tab-button .tab-icon {
+      height: 24px;
+      font-size: 17px;
+    }
+    .tab-label {
+      font-size: 13px;
+      font-weight: 850;
+    }
+    @media (max-width: 360px) {
+      .content {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+      .summary-item {
+        padding: 9px 8px;
+      }
+      .summary-item strong {
+        font-size: 18px;
+      }
+      .calendar-cell {
+        min-height: 52px;
+        padding: 6px 4px;
+      }
+      .calendar-tag {
+        font-size: 9px;
+      }
+      .settings-row {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1115,8 +1584,8 @@
         <h1 id="headerDate">今日</h1>
         <p class="sub">デイリー・ハブ</p>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <button id="openSettings" class="icon-button" title="設定">⚙️</button>
+      <div class="topbar-actions">
+        <button id="openSettings" class="icon-button" title="設定" aria-label="設定">⚙</button>
         <div class="sub" id="todayLabel"></div>
       </div>
     </div>
@@ -1147,11 +1616,11 @@
             <div id="homeScheduleList" class="home-schedule-list"></div>
           </div>
           <div class="card">
-            <div style="margin-top:14px;">
+            <div class="memo-block">
               <label class="section-title" for="goalMemo">メモ</label>
               <textarea id="goalMemo" class="text-area" placeholder="今日の気づきや今日の一言をメモ"></textarea>
             </div>
-            <div class="row" style="margin-top:12px;">
+            <div class="row action-row">
               <button class="button" id="saveGoalMemo">保存</button>
               <button class="button small ghost" id="clearGoalMemo">クリア</button>
             </div>
@@ -1166,7 +1635,7 @@
               </div>
               <strong id="streakBadge" class="streak-badge">0日</strong>
             </div>
-            <div id="habitList" style="margin-top:10px;"></div>
+            <div id="habitList" class="habit-list"></div>
             <button class="button small" id="addHabit">追加</button>
           </div>
           <div class="card habit-stats-card">
@@ -1202,7 +1671,7 @@
             <div class="calendar-month" id="diaryDateLabel">今日</div>
             <button class="button small ghost" id="nextDiaryDay">翌日</button>
           </div>
-          <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <div class="diary-tools">
             <button class="button small ghost" id="toggleDiarySearch">過去を検索</button>
             <div class="sub-text" style="align-self:center;">日付を遡って編集できます</div>
           </div>
@@ -1243,11 +1712,11 @@
             <button class="button small today-button" id="todayCalendar">今月へ</button>
           </div>
           <div class="calendar-header">
-            <button class="button small ghost" id="prevCalendar">前</button>
+            <button class="button small ghost" id="prevCalendar" aria-label="前の月">前</button>
             <div class="calendar-month" id="calendarTitle">2026年5月</div>
-            <button class="button small ghost" id="nextCalendar">次</button>
+            <button class="button small ghost" id="nextCalendar" aria-label="次の月">次</button>
           </div>
-              <div id="calendarBody"></div>
+          <div id="calendarBody"></div>
         </div>
       </section>
     </main>
@@ -1729,7 +2198,12 @@
         const doneCount = day.habits.filter((habit) => habit.done).length;
         const li = document.createElement('li');
         if (key === todayKey) li.classList.add('today-report');
-        li.innerHTML = `<span>${label}${key === todayKey ? ' 今日' : ''}</span><span>${doneCount} / ${day.habits.length}</span>`;
+        const dayLabel = document.createElement('span');
+        dayLabel.textContent = `${label}${key === todayKey ? ' 今日' : ''}`;
+        const dayCount = document.createElement('span');
+        dayCount.textContent = `${doneCount} / ${day.habits.length}`;
+        li.appendChild(dayLabel);
+        li.appendChild(dayCount);
         weeklyReport.appendChild(li);
       });
     }
@@ -1901,9 +2375,8 @@
       });
       for (let i = 0; i < startDay; i += 1) {
         const blank = document.createElement('div');
-        blank.className = 'calendar-cell';
-        blank.style.background = 'transparent';
-        blank.style.border = 'none';
+        blank.className = 'calendar-cell blank';
+        blank.setAttribute('aria-hidden', 'true');
         calendarBody.appendChild(blank);
       }
       for (let date = 1; date <= daysInMonth; date += 1) {
@@ -1911,8 +2384,14 @@
         const key = formatDateKey(cellDate);
         const day = getDay(key);
         const cell = document.createElement('div');
+        const hasHabitDone = day.habits.some((habit) => habit.done);
         cell.className = 'calendar-cell';
         if (key === selectedCalendarDate) cell.classList.add('selected');
+        if (key === formatDateKey(today)) cell.classList.add('today');
+        if (day.schedules.length || day.diary || hasHabitDone) cell.classList.add('has-content');
+        cell.setAttribute('role', 'button');
+        cell.setAttribute('tabindex', '0');
+        cell.setAttribute('aria-label', `${formatDateLabel(cellDate)}の予定を開く`);
         const number = document.createElement('div');
         number.className = 'date-number';
         number.textContent = date;
@@ -1925,13 +2404,32 @@
           mark.textContent = `${day.schedules.length}件`;
           tags.appendChild(mark);
         }
+        if (day.diary) {
+          const diaryMark = document.createElement('span');
+          diaryMark.className = 'calendar-tag diary-tag';
+          diaryMark.textContent = '日記';
+          tags.appendChild(diaryMark);
+        }
+        if (hasHabitDone) {
+          const habitMark = document.createElement('span');
+          habitMark.className = 'calendar-tag habit-tag';
+          habitMark.textContent = '継続';
+          tags.appendChild(habitMark);
+        }
         cell.appendChild(tags);
-        cell.addEventListener('click', () => {
+        const openCell = () => {
           selectedCalendarDate = key;
           diarySelectedDate = key;
           updateDiaryDisplay();
           renderCalendarView();
           openDayScheduleModal(key);
+        };
+        cell.addEventListener('click', openCell);
+        cell.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openCell();
+          }
         });
         calendarBody.appendChild(cell);
       }
