@@ -1,10 +1,10 @@
 {
   "name": "my-diary-app",
   "version": "1.0.0",
-  "description": "日記、目標、予定、リマインダーをまとめるPWA/Androidアプリ",
+  "description": "日記、今日の予定、継続チェック、リマインダーをまとめるPWA/Androidアプリ",
   "main": "index.html",
   "scripts": {
-    "serve": "python -m http.server 3000 --bind 127.0.0.1",
+    "serve": "node scripts/serve.js",
     "prepare:android": "node scripts/copy-web-assets.js",
     "android:add": "npm run prepare:android && npx cap add android",
     "android:sync": "npm run prepare:android && npx cap sync android",
